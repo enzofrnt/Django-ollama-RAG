@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat with IA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+
+        /* Style pour l'animation des points de chargement */
+        .loading-dots {
+            display: flex;
+            align-items: center;
+        }
+        .loading-dots .dot {
+            width: 8px;
+            height: 8px;
+            margin: 0 2px;
+            background-color: #007BFF;
+            border-radius: 50%;
+            animation: bounce 1s infinite;
+        }
+        .loading-dots .dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+        .loading-dots .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .loading-dots .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+        #warn-pdf-type {
+            color: red;
+            font-size: 12px;
+            font-style: italic;
+        }
+        .disclaimer {
+            font-size: 12px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chat avec IA</h1>
+        <p class="disclaimer">
+            En fonction de la puissance de calcul de votre machine certaines requêtes peuvent prendre du temps.
+        </p>
+        <form id="chat-form">
+            <div class="form-group">
+                <label for="query">Entrez votre requête :</label>
+                <textarea id="query" name="query" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <button type="submit">Envoyer</button>
+            </div>
+        </form>
+        <div id="chat-response" class="response" style="display: none;"></div>
+        <div id="chat-sources" class="response" style="display: none;"></div>
+
+        <h2>Gestion des Documents</h2>
+        <div id="documents-section">
+            <button onclick="fetchDocuments()">Rafraîchir les Documents</button>
+            <div id="documents-list" style="margin-top: 10px; padding: 10px; border: 1px solid #ccc;">
+                Chargement des documents...
+            </div>
+        </div>
+
+        <h2>Uploader un Fichier vers le RAG</h2>
+        <p id="warn-pdf-type"> 
+            Attention certain pdf pourrait ne pas fonctionner. 
+            (parfois des PDF sont construit à partir d'image, et cette demo ne supporte pas ce genre de pdf)
+        </p>
+        <form id="file-upload-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Choisir des fichiers :</label>
+                <input type="file" id="file" name="files" accept="application/pdf" multiple required>
+            </div>
+            <div class="form-group">
+                <button type="submit">Uploader</button>
+            </div>
+        </form>
+        <div id="file-upload-status" class="response" style="display: none;"></div>
+    </div>
+
+    <script>
+        const sessionKey = '{{ request.session.session_key }}';
+        const eventSource = new EventSource(`/events/?channel=chat_${sessionKey}`);
+        const chatSources = document.getElementById('chat-sources');
+
+        eventSource.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const chatResponse = document.getElementById('chat-response');
+            chatResponse.textContent += data.text;
+        };
+
+        eventSource.onerror = function(e) {
+            console.error('Erreur lors de la connexion SSE :', e);
+        };
+
+        document.getElementById('chat-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const query = document.getElementById('query').value;
+
+            // Afficher le div de réponse avec l'animation des points
+            const chatResponse = document.getElementById('chat-response');
+            chatResponse.style.display = 'block';
+            chatResponse.innerHTML = '<div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+
+            fetch('/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({
+                    'query': query
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatSources.style.display = 'block';
+                chatSources.innerHTML = 'Sources : ' + data.sources
+            })
+            .catch(error => {
+                console.error('Erreur lors de la requête :', error);
+                chatResponse.innerHTML = 'Une erreur est survenue.';
+            });
+        });
+
+        document.getElementById('file-upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const files = document.getElementById('file').files;
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files', files[i]);
+            }
+            fetch('/add_file/', { // Assurez-vous que l'URL correspond à la vue modifiée
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const fileUploadStatus = document.getElementById('file-upload-status');
+                fileUploadStatus.style.display = 'block';
+                fileUploadStatus.textContent = data.status;
+                fetchDocuments();
+                setTimeout(() => {
+                    fileUploadStatus.style.display = 'none';
+                }, 5000);
+                fetchDocuments();
+            });
+        });
+
+        function fetchDocuments() {
+            fetch('/list_documents/')
+                .then(response => response.json())
+                .then(data => {
+                    const documentsList = document.getElementById('documents-list');
+                    documentsList.innerHTML = ''; // Vider la liste existante
+        
+                    if (data.documents.length === 0) {
+                        documentsList.textContent = 'Aucun document trouvé.';
+                    } else {
+                        data.documents.forEach(doc => {
+                            const docDiv = document.createElement('div');
+                            docDiv.textContent = `Document : ${doc.name}`;
+        
+                            const deleteButton = document.createElement('button');
+                            deleteButton.textContent = 'Supprimer';
+                            deleteButton.style.marginLeft = '10px';
+                            deleteButton.onclick = function() {
+                                deleteDocument(doc.id);
+                            };
+        
+                            docDiv.appendChild(deleteButton);
+                            documentsList.appendChild(docDiv);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la récupération des documents :', error);
+                    const documentsList = document.getElementById('documents-list');
+                    documentsList.textContent = 'Erreur lors de la récupération des documents.';
+                });
+        }
+    
+        // Supprimer un document
+        function deleteDocument(docId) {
+            fetch('/delete_document/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({
+                    'doc_id': docId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status) {
+                    alert(data.status);
+                    fetchDocuments();
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la suppression du document :', error);
+            });
+        }
+    
+        window.onload = fetchDocuments;
+    </script>
+</body>
+</html>

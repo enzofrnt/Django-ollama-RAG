@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Chunks</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+            text-align: left;
+        }
+        pre {
+            white-space: pre-wrap; /* Permet de conserver les sauts de ligne */
+            word-wrap: break-word; /* Permet de couper les longues chaînes */
+        }
+    </style>
+</head>
+<body>
+    <h1>Liste des Chunks</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Source</th>
+                <th>Page</th>
+                <th>Chunk Index</th>
+                <th>Content</th>
+                <th>Embedding</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chunk in chunks %}
+            <tr>
+                <td>{{ chunk.source }}</td>
+                <td>{{ chunk.page }}</td>
+                <td>{{ chunk.chunk_index }}</td>
+                <td>{{ chunk.content }}</td>
+                <td>
+                    <pre>{{ chunk.embedding }}</pre>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
