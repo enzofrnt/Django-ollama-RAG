@@ -4,6 +4,7 @@
 
 - Python 3.10
 - Ollama installé et disponible
+- Docker
 
 ## Installation
 
@@ -26,6 +27,11 @@
     ```
 
 5. Assurez-vous qu'Ollama est installé et disponible sur votre système.
+
+6. Lancer le conteneur Docker de la base de données postgres (cette base de données est capable de stocker des vecteurs) :
+```bash
+docker run -d -e POSTGRES_PASSWORD=password -p 5432:5432 pgvector/pgvector:0.8.0-pg17
+```
 
 ## Lancer l'application
 
