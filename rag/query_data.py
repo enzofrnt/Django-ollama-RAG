@@ -1,14 +1,9 @@
-import argparse
-import subprocess
-
 from django.conf import settings
 from langchain.prompts import ChatPromptTemplate
 from langchain_ollama import OllamaLLM
-
-from .get_embedding_function import get_embedding_function
-
 from pgvector.django import CosineDistance
 
+from .embedding_function import embed_query
 from .models import Chunk
 
 
@@ -32,14 +27,7 @@ def get_similar_chunks(query_embedding, top_k=5):
     return similar_chunks
 
 
-from langchain.prompts import ChatPromptTemplate
-from langchain_ollama import OllamaLLM
-
-from .get_embedding_function import get_embedding_function
-from .models import Chunk
-
-
-def query_rag_with_postgres(query_text: str):
+def query_rag(query_text: str):
     """
     Interroge une base PostgreSQL pour récupérer des chunks similaires,
     puis utilise un modèle de langage pour répondre.
@@ -48,8 +36,7 @@ def query_rag_with_postgres(query_text: str):
     :return: Générateur de réponse et liste des sources.
     """
     # Générer l'embedding pour la requête
-    embedding_function = get_embedding_function()
-    query_embedding = embedding_function.embed_query(query_text)
+    query_embedding = embed_query(query_text)
 
     # Rechercher les chunks similaires
     similar_chunks = get_similar_chunks(query_embedding)

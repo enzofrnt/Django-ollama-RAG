@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liste des Chunks</title>
-    <style>
+{% extends 'base.html' %}
+
+{% block title %}Liste des chunks{% endblock %}
+
+{% block styles %}
         table {
             width: 100%;
             border-collapse: collapse;
@@ -21,10 +19,15 @@
             white-space: pre-wrap; /* Permet de conserver les sauts de ligne */
             word-wrap: break-word; /* Permet de couper les longues chaînes */
         }
-    </style>
-</head>
-<body>
+{% endblock %}
+{% block content %}
     <h1>Liste des Chunks</h1>
+
+    <button onclick="window.location.href='{% url 'chat' %}'">Chat avec IA</button>
+
+    <br><br>    
+    
+    {% if chunks %}
     <table>
         <thead>
             <tr>
@@ -32,22 +35,24 @@
                 <th>Page</th>
                 <th>Chunk Index</th>
                 <th>Content</th>
-                <th>Embedding</th>
+                <th>First 20 caracters of Embedding</th>
             </tr>
         </thead>
         <tbody>
             {% for chunk in chunks %}
             <tr>
-                <td>{{ chunk.source }}</td>
+                <td>{{ chunk.document }}</td>
                 <td>{{ chunk.page }}</td>
                 <td>{{ chunk.chunk_index }}</td>
                 <td>{{ chunk.content }}</td>
                 <td>
-                    <pre>{{ chunk.embedding }}</pre>
+                    <pre>{{ chunk.embedding|slice:":20" }}</pre>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</body>
-</html>
+    {% else %}
+        <p>Aucun chunk n'a été trouvé.</p>
+    {% endif %}
+{% endblock %}

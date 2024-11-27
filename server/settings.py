@@ -143,9 +143,6 @@ LANGUAGE_MODEL_NAME = "llama3.2"
 # Modèle utilisé pour les embeddings
 EMBEDDING_MODEL_NAME = "nomic-embed-text"
 
-# Chemin vers les documents à ajouter à la base de données
-DATA_PATH = os.path.join(BASE_DIR, "data")
-
 # Modèle de pre-prompts pour les questions, le contexte correpond aux documents similaires trouvés
 # et la question est la question posée par l'utilisateur
 PROMPT_TEMPLATE = """

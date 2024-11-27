@@ -1,17 +1,4 @@
 from django.db import models
-from pgvector.django import VectorField
-
-
-class Embedding(models.Model):
-    file_name = models.CharField(max_length=255)
-    content = models.TextField()
-    embedding = VectorField(dimensions=768)  # Mise à jour à 768
-
-    def __str__(self):
-        return self.file_name
-
-
-from django.db import models
 from pgvector.django import IvfflatIndex, VectorField
 
 
