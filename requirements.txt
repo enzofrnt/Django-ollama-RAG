@@ -11,3 +11,6 @@ daphne==4.1.2
 django-eventstream==5.3.1
 pgvector==0.3.6
 psycopg2-binary==2.9.10
+
+matplotlib==3.9.3
+scikit-learn==1.5.2
