@@ -108,12 +108,20 @@ def view_request_in_3d(request):
     query = request.GET.get("query", "Requête par défaut si vide")
     k = 5
 
-    graph_html, best_chunks = display_cos_sim_in_3D(query, k)
+    graph_html_pca, graph_html_tsne, graph_html_umap, best_chunks = (
+        display_cos_sim_in_3D(query, k)
+    )
 
     return render(
         request,
         "interactive_graph.html",
-        {"graph_html": graph_html, "query": query, "chunks": best_chunks},
+        {
+            "graph_html_pca": graph_html_pca,
+            "graph_html_tsne": graph_html_tsne,
+            "graph_html_umap": graph_html_umap,
+            "query": query,
+            "chunks": best_chunks,
+        },
     )
 
 

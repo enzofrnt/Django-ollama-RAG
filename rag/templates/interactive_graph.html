@@ -3,24 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <title>Graphique 3D Interactif</title>
+    <style>
+        /* Styles pour les onglets */
+        .tab {
+            overflow: hidden;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        .tabcontent {
+            display: none;
+            padding: 20px 0;
+        }
+    </style>
 </head>
 <body>
     <button onclick="window.location.href='{% url 'chat' %}'">Chat avec IA</button>
 
-    <h1>Mon Graphique 3D Interactif</h1>
-    <p> Graphique correpondant à la requête : <strong>{{ query }}</strong></p>
-    {{ graph_html|safe }}
+    <h1>Visualisation 3D Interactive</h1>
+    <p>Graphiques correspondant à la requête : <strong>{{ query }}</strong></p>
+
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'pca')" id="defaultOpen">PCA</button>
+        <button class="tablinks" onclick="openTab(event, 'tsne')">t-SNE</button>
+        <button class="tablinks" onclick="openTab(event, 'umap')">UMAP</button>
+    </div>
+
+    <div id="pca" class="tabcontent">
+        <h2>Projection PCA 3D</h2>
+        {{ graph_html_pca|safe }}
+    </div>
+
+    <div id="tsne" class="tabcontent">
+        <h2>Projection t-SNE 3D</h2>
+        {{ graph_html_tsne|safe }}
+    </div>
+
+    <div id="umap" class="tabcontent">
+        <h2>Projection UMAP 3D</h2>
+        {{ graph_html_umap|safe }}
+    </div>
 
     <h2>Liste des {{ chunks|length }} meilleurs chunks</h2>
     {% if chunks %}
-    <table>
+    <table border="1" cellspacing="0" cellpadding="5">
         <thead>
             <tr>
                 <th>Source</th>
                 <th>Page</th>
                 <th>Chunk Index</th>
                 <th>Content</th>
-                <th>First 20 caracters of Embedding</th>
+                <th>First 20 characters of Embedding</th>
             </tr>
         </thead>
         <tbody>
@@ -40,5 +91,24 @@
     {% else %}
         <p>Aucun chunk n'a été trouvé.</p>
     {% endif %}
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // Ouvrir par défaut l'onglet PCA
+        document.getElementById("defaultOpen").click();
+    </script>
 </body>
 </html>
