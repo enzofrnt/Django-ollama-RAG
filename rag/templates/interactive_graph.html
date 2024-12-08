@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Graphique 3D Interactif</title>
+</head>
+<body>
+    <button onclick="window.location.href='{% url 'chat' %}'">Chat avec IA</button>
+
+    <h1>Mon Graphique 3D Interactif</h1>
+    <p> Graphique correpondant à la requête : <strong>{{ query }}</strong></p>
+    {{ graph_html|safe }}
+
+    <h2>Liste des {{ chunks|length }} meilleurs chunks</h2>
+    {% if chunks %}
+    <table>
+        <thead>
+            <tr>
+                <th>Source</th>
+                <th>Page</th>
+                <th>Chunk Index</th>
+                <th>Content</th>
+                <th>First 20 caracters of Embedding</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chunk in chunks %}
+            <tr>
+                <td>{{ chunk.document }}</td>
+                <td>{{ chunk.page }}</td>
+                <td>{{ chunk.chunk_index }}</td>
+                <td>{{ chunk.content }}</td>
+                <td>
+                    <pre>{{ chunk.embedding|slice:":20" }}</pre>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>Aucun chunk n'a été trouvé.</p>
+    {% endif %}
+</body>
+</html>

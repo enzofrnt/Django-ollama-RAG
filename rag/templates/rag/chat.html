@@ -94,6 +94,7 @@
             <button type="submit">Envoyer</button>
         </div>
     </form>
+    <button id="visualiser-3d-btn">Visualiser la requête en 3D</button>
     <div id="chat-response" class="response" style="display: none;"></div>
     <div id="chat-sources" class="response" style="display: none;"></div>
 
@@ -259,6 +260,15 @@
             console.error('Erreur lors de la suppression du document :', error);
         });
     }
+
+    document.getElementById('visualiser-3d-btn').addEventListener('click', function() {
+        const queryValue = document.getElementById('query').value;
+        if (queryValue.trim() !== '') {
+            window.location.href = '/3d_view/?query=' + encodeURIComponent(queryValue);
+        } else {
+            alert('Veuillez entrer une requête avant de visualiser en 3D.');
+        }
+    });
 
     window.onload = fetchDocuments;
 </script>
