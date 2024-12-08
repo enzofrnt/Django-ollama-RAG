@@ -24,12 +24,19 @@ def display_cos_sim_in_3D(
     all_embeddings = [chunk.embedding for chunk in chunks]
     len_all_embeddings = len(all_embeddings)
 
+    if not len_all_embeddings:
+        return (
+            "<h1 style='color:red'>Pas de fichier ajouter à l'app pour le moment</h1>",
+            [],
+        )
+
     # Embedding de la requête
     query_embedding = embed_query(query_text)
     all_embeddings.append(query_embedding)
 
     # Récupérer les chunks similaires
     similar_chunks = get_similar_chunks(query_embedding, len_all_embeddings - 1)
+
     similar_chunk_ids = {chunk.id for chunk in similar_chunks}
     best_chunks = similar_chunks[:k]
 
