@@ -1,9 +1,12 @@
+import numpy as np
+import plotly.express as px
+from django.shortcuts import render
 from django.urls import include, path
 from django.views.generic import RedirectView
 from django_eventstream import urls
+from sklearn.decomposition import PCA
 
 from . import views
-from .views import ChunkListView
 
 urlpatterns = [
     path(
@@ -22,5 +25,6 @@ urlpatterns = [
         include(urls),
         {"channels": ["chat"]},
     ),  # URL pour les événements, chat en temps réel
-    path("chunks/", ChunkListView.as_view(), name="chunk_list"),
+    path("chunks/", views.ChunkListView.as_view(), name="chunk_list"),
+    path("3d_view/", views.view_request_in_3d, name="test"),
 ]
