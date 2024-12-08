@@ -17,9 +17,9 @@ def get_similar_chunks(query_embedding, top_k=5):
     """
     # Effectuer la recherche avec CosineDistance
     similar_chunks = Chunk.objects.annotate(
-        similarity=CosineDistance("embedding", query_embedding)
+        distance=CosineDistance("embedding", query_embedding)
     ).order_by(
-        "similarity"
+        "distance"
     )[  # Distance cosinus croissante (plus proche = meilleur)
         :top_k
     ]  # Limite à top_k résultats
