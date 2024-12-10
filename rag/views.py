@@ -1,3 +1,5 @@
+import mimetypes
+
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -5,11 +7,17 @@ from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import ListView
 from django_eventstream import send_event
 from httpx import ConnectError
-from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import (
+    PyPDFLoader,
+    TextLoader,
+    UnstructuredWordDocumentLoader,
+)
 
 from .models import Chunk, Document
 from .populate_database import add_to_django, split_documents
 from .query_data import query_rag
+
+mimetypes.add_type("text/markdown", ".md")
 
 
 @csrf_exempt
@@ -50,19 +58,70 @@ def chat(request):
 def add_file(request):
     if request.method == "POST" and request.FILES:
         uploaded_files = request.FILES.getlist("files")
-        for uploaded_file in uploaded_files:
-            # Créez une instance du modèle Document pour chaque fichier
-            document = Document.objects.create(file=uploaded_file)
-            document.save()
-            print(f"✅ Fichier '{document.file.name}' sauvegardé.")
 
-            # Charger et traiter le document
-            loader = PyPDFLoader(document.file.path)
-            pages = loader.load()
-            chunks = split_documents(pages)
-            add_to_django(chunks, document)
+        # Types de fichiers pris en charge
+        supported_types = {
+            "application/pdf": PyPDFLoader,  # Pour les PDF
+            "text/plain": TextLoader,  # Pour les fichiers .txt
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": UnstructuredWordDocumentLoader,  # Pour les .docx
+            "text/markdown": TextLoader,  # Pour les .md
+            "text/x-markdown": TextLoader,  # Cas alternatif pour .md
+            "text/x-wiki": TextLoader,  # Pour les fichiers Wikitext
+        }
+
+        for uploaded_file in uploaded_files:
+            # Détecter le type de fichier en fonction de son extension
+            file_type, encoding = mimetypes.guess_type(uploaded_file.name)
+
+            # Vérifie si le type MIME est pris en charge
+            if file_type not in supported_types:
+                return JsonResponse(
+                    {
+                        "error": f"Type de fichier '{file_type}' non pris en charge pour '{uploaded_file.name}'"
+                    },
+                    status=400,
+                )
+
+            # Créer l'objet Document en base de données
+            document = Document.objects.create(file=uploaded_file)
+            print(f"✅ Fichier '{document.file.name}' sauvegardé.")
+            document.save()
+
+            # Charger et traiter le document en fonction de son type MIME
+            try:
+                loader_class = supported_types[file_type]
+                loader = loader_class(document.file.path)
+                pages = loader.load()
+            except Exception as e:
+                document.delete()
+                print(
+                    f"❌ Erreur de chargement du fichier '{document.file.name}': {str(e)}"
+                )
+                return JsonResponse(
+                    {
+                        "error": f"Erreur de traitement du fichier '{uploaded_file.name}'"
+                    },
+                    status=400,
+                )
+
+            # Diviser le document en chunks
+            try:
+                chunks = split_documents(pages)
+                add_to_django(chunks, document)
+            except Exception as e:
+                print(
+                    f"❌ Erreur de segmentation du fichier '{document.file.name}': {str(e)}"
+                )
+                document.delete()
+                return JsonResponse(
+                    {
+                        "error": f"Erreur de segmentation du fichier '{uploaded_file.name}'"
+                    },
+                    status=400,
+                )
 
         return JsonResponse({"status": "Fichiers ajoutés avec succès"})
+
     return JsonResponse({"error": "Aucun fichier envoyé"}, status=400)
 
 
