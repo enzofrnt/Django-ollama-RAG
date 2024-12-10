@@ -1,10 +1,6 @@
-import numpy as np
-import plotly.express as px
-from django.shortcuts import render
 from django.urls import include, path
 from django.views.generic import RedirectView
 from django_eventstream import urls
-from sklearn.decomposition import PCA
 
 from . import views
 

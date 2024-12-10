@@ -1,6 +1,5 @@
 import numpy as np
 import plotly.graph_objects as go
-from django.shortcuts import render
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from umap import UMAP
