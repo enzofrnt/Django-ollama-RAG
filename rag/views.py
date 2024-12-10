@@ -27,7 +27,7 @@ def chat(request):
         )  # Nettoie les identifiants des sources
 
         # Définir un canal d'événements pour la session
-        channel_name = f"chat"
+        channel_name = "chat"
 
         # Envoie les réponses en morceaux via des événements serveur
         try:
