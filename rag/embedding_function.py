@@ -13,7 +13,10 @@ def embed_query(text: str):
     model_name = settings.EMBEDDING_MODEL_NAME
 
     # Initialiser la fonction d'embedding avec le modèle donné
-    embeddings = OllamaEmbeddings(model=model_name)
+    embeddings = OllamaEmbeddings(
+        model=model_name,
+        base_url=settings.OLLAMA_API_URL,
+    )
 
     try:
         embedding = embeddings.embed_query(text)

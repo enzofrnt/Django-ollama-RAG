@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_browser_reload",
     "django_eventstream",
+    "wait_for_db",
     "rag",
 ]
 
@@ -81,17 +82,13 @@ ASGI_APPLICATION = "server.asgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # "default": {
-    #     "ENGINE": "django.db.backends.sqlite3",
-    #     "NAME": BASE_DIR / "db.sqlite3",
-    # }
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "password",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "NAME": os.getenv("POSTGRES_DB", "postgres"),
+        "USER": os.getenv("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "password"),
+        "HOST": os.getenv("POSTGRES_HOST", "localhost"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     }
 }
 
@@ -137,6 +134,9 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# URL de l'API Llama
+OLLAMA_API_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434")
+
 # Model utilisé pour les réponses de l'API
 LANGUAGE_MODEL_NAME = "llama3.2"
 
@@ -153,6 +153,7 @@ Answer the question based only on the following context:
 ---
 
 Answer the question based on the above context: {question}
+Finished your answer by your level of confidence in the answer from the given context.
 """
 
 MEDIA_URL = "/media/"

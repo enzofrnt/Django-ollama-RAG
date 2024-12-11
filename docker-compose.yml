@@ -1,0 +1,21 @@
+services:
+  db:
+    image: pgvector/pgvector:0.8.0-pg17
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    env_file:
+      - .env
+  
+  django:
+    build: .
+    depends_on:
+      - db
+    volumes:
+      - .:/django-ollama-rag
+    ports:
+      - 8000:8000
+    env_file:
+      - .env
+
+volumes:
+  pgdata:

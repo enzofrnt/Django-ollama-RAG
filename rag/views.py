@@ -1,3 +1,4 @@
+import logging
 import mimetypes
 
 from django.http import JsonResponse
@@ -18,7 +19,12 @@ from .models import Chunk, Document
 from .populate_database import add_to_django, split_documents
 from .query_data import query_rag
 
+logger = logging.getLogger(__name__)
+
 mimetypes.add_type("text/markdown", ".md")
+mimetypes.add_type(
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".docx"
+)
 
 
 @csrf_exempt
@@ -85,7 +91,7 @@ def add_file(request):
 
             # Créer l'objet Document en base de données
             document = Document.objects.create(file=uploaded_file)
-            print(f"✅ Fichier '{document.file.name}' sauvegardé.")
+            logger.info(f"✅ Fichier '{document.file.name}' sauvegardé.")
             document.save()
 
             # Charger et traiter le document en fonction de son type MIME
@@ -95,7 +101,7 @@ def add_file(request):
                 pages = loader.load()
             except Exception as e:
                 document.delete()
-                print(
+                logger.error(
                     f"❌ Erreur de chargement du fichier '{document.file.name}': {str(e)}"
                 )
                 return JsonResponse(
@@ -110,7 +116,7 @@ def add_file(request):
                 chunks = split_documents(pages)
                 add_to_django(chunks, document)
             except Exception as e:
-                print(
+                logger.error(
                     f"❌ Erreur de segmentation du fichier '{document.file.name}': {str(e)}"
                 )
                 document.delete()
@@ -140,12 +146,13 @@ def delete_document(request):
     doc_id = request.POST.get("doc_id")
     if not doc_id:
         return JsonResponse({"error": "ID du document manquant"}, status=400)
-
     try:
         document = Document.objects.get(pk=doc_id)
         doc_name = str(document)
         document.delete()
-        print(f"✅ Document '{doc_name}' et ses chunks associés ont été supprimés.")
+        logger.info(
+            f"✅ Document '{doc_name}' et ses chunks associés ont été supprimés."
+        )
         return JsonResponse({"status": "Document supprimé avec succès"})
     except Document.DoesNotExist:
         return JsonResponse({"error": "Document introuvable"}, status=404)

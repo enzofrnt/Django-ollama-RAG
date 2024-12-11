@@ -50,7 +50,10 @@ def query_rag(query_text: str):
     # Charger le modèle de langage
     prompt_template = ChatPromptTemplate.from_template(settings.PROMPT_TEMPLATE)
     prompt = prompt_template.format(context=context_text, question=query_text)
-    model = OllamaLLM(model=settings.LANGUAGE_MODEL_NAME)
+    model = OllamaLLM(
+        model=settings.LANGUAGE_MODEL_NAME,
+        base_url=settings.OLLAMA_API_URL,
+    )
 
     # Streamer la réponse et collecter les sources
     response_generator = model.stream(prompt)
