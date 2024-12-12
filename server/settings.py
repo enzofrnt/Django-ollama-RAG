@@ -41,9 +41,22 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_browser_reload",
     "django_eventstream",
+    "rest_framework",
+    "drf_spectacular",
     "wait_for_db",
     "rag",
 ]
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+        "django_eventstream.renderers.SSEEventRenderer",
+        "django_eventstream.renderers.BrowsableAPIEventStreamRenderer",
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -55,6 +68,13 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Django Ollama RAG API",
+    "DESCRIPTION": "This project is a Django Web Server that provide a simple RAG interface znd API using Ollama and SSE.",
+    "VERSION": "0.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
 
 ROOT_URLCONF = "server.urls"
 

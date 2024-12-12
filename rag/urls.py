@@ -1,8 +1,25 @@
 from django.urls import include, path
 from django.views.generic import RedirectView
 from django_eventstream import urls
+from django_eventstream.viewsets import configure_events_view_set
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from hybridrouter import HybridRouter
 
-from . import views
+from . import views, viewsets
+
+router = HybridRouter()
+router.register(r"documents", viewsets.DocumentViewSet)
+router.register(r"chunks", viewsets.ChunkViewSet)
+router.register(
+    "events",
+    configure_events_view_set(
+        channels=["chat"],
+    ),
+    basename="events1",
+)
+router.register(r"chat", views.ChatAPIView, basename="chat")
+router.register(r"schema/swagger-ui", SpectacularSwaggerView, basename="swagger-ui")
+router.register(r"schema", SpectacularAPIView, basename="schema")
 
 urlpatterns = [
     path(
@@ -23,4 +40,5 @@ urlpatterns = [
     ),  # URL pour les événements, chat en temps réel
     path("chunks/", views.ChunkListView.as_view(), name="chunk_list"),
     path("3d_view/", views.view_request_in_3d, name="test"),
+    path("api/", include(router.urls)),
 ]

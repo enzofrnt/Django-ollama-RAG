@@ -13,6 +13,9 @@ from langchain_community.document_loaders import (
     TextLoader,
     UnstructuredWordDocumentLoader,
 )
+from rest_framework.exceptions import APIException
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .graph import display_cos_sim_in_3D
 from .models import Chunk, Document
@@ -195,3 +198,34 @@ class ChunkListView(ListView):
     model = Chunk
     template_name = "chunk_list.html"
     context_object_name = "chunks"
+
+
+class ChatAPIView(APIView):
+    """
+    Vue API pour gérer le chat RAG via une requête POST.
+    """
+
+    def post(self, request, *args, **kwargs):
+        query_text = request.data.get("query")
+        if not query_text:
+            return Response({"error": "Le paramètre 'query' est requis."}, status=400)
+
+        # Interroge le modèle RAG
+        response_generator, sources = query_rag(query_text)
+        formatted_sources_text = clean_ids(sources)
+        channel_name = "chat"
+
+        try:
+            # Envoi des chunks via SSE (cette logique dépend de votre implémentation)
+            for chunk in response_generator:
+                send_event(channel_name, "message", {"text": chunk})
+        except ConnectError:
+            send_event(
+                channel_name,
+                "message",
+                {"text": "❌ Erreur impossible d'accéder à Ollama."},
+            )
+            raise APIException("❌ Erreur de connexion impossible d'accéder à Ollama.")
+
+        # Retourne les sources en JSON
+        return Response({"sources": formatted_sources_text})
