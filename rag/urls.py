@@ -1,7 +1,7 @@
 from django.urls import include, path
 from django.views.generic import RedirectView
 from django_eventstream import urls
-from django_eventstream.viewsets import configure_events_view_set
+from django_eventstream.viewsets import EventsViewSet
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from hybridrouter import HybridRouter
 
@@ -12,9 +12,7 @@ router.register(r"documents", viewsets.DocumentViewSet)
 router.register(r"chunks", viewsets.ChunkViewSet)
 router.register(
     "events",
-    configure_events_view_set(
-        channels=["chat"],
-    ),
+    EventsViewSet,
     basename="events1",
 )
 router.register(r"chat", views.ChatAPIView, basename="chat")

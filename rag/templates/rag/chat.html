@@ -126,8 +126,13 @@
 </div>
 
 <script>
-    const sessionKey = '{{ request.session.session_key }}';
-    const eventSource = new EventSource(`/events/?channel=chat_${sessionKey}`);
+    let uuid = localStorage.getItem('chat_uuid');
+    if (!uuid) {
+        uuid = crypto.randomUUID();
+        localStorage.setItem('chat_uuid', uuid);
+    }
+
+    const eventSource = new EventSource(`/api/events/?channels=chat_${uuid}`);
     const chatSources = document.getElementById('chat-sources');
 
     eventSource.onmessage = function(e) {
@@ -156,7 +161,8 @@
                 'X-CSRFToken': '{{ csrf_token }}'
             },
             body: new URLSearchParams({
-                'query': query
+                'query': query,
+                'uuid': uuid
             })
         })
         .then(response => response.json())

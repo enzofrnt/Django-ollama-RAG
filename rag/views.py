@@ -38,6 +38,7 @@ def chat(request):
     """
     if request.method == "POST":
         query_text = request.POST.get("query")  # Récupère la requête utilisateur
+        uuid = request.POST.get("uuid")  # Récupère l'identifiant de session
         response_generator, sources = query_rag(query_text)  # Interroge le modèle RAG
 
         formatted_sources_text = clean_ids(
@@ -45,7 +46,7 @@ def chat(request):
         )  # Nettoie les identifiants des sources
 
         # Définir un canal d'événements pour la session
-        channel_name = "chat"
+        channel_name = f"chat_{uuid}"
 
         # Envoie les réponses en morceaux via des événements serveur
         try:
