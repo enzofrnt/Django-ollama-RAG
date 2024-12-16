@@ -128,7 +128,11 @@
 <script>
     let uuid = localStorage.getItem('chat_uuid');
     if (!uuid) {
-        uuid = crypto.randomUUID();
+        if (window.crypto && window.crypto.randomUUID) {
+            uuid = crypto.randomUUID();
+        } else {
+            uuid = "{{ uuid }}";
+        }
         localStorage.setItem('chat_uuid', uuid);
     }
 

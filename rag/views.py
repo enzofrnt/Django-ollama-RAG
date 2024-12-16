@@ -1,5 +1,6 @@
 import logging
 import mimetypes
+import uuid
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -38,7 +39,7 @@ def chat(request):
     """
     if request.method == "POST":
         query_text = request.POST.get("query")  # Récupère la requête utilisateur
-        uuid = request.POST.get("uuid")  # Récupère l'identifiant de session
+        chat_uuid = request.POST.get("uuid")  # Récupère l'identifiant de session
         response_generator, sources = query_rag(query_text)  # Interroge le modèle RAG
 
         formatted_sources_text = clean_ids(
@@ -46,7 +47,7 @@ def chat(request):
         )  # Nettoie les identifiants des sources
 
         # Définir un canal d'événements pour la session
-        channel_name = f"chat_{uuid}"
+        channel_name = f"chat_{chat_uuid}"
 
         # Envoie les réponses en morceaux via des événements serveur
         try:
@@ -62,7 +63,9 @@ def chat(request):
 
         # Retourne les sources en réponse pour terminer
         return JsonResponse({"sources": formatted_sources_text})
-    return render(request, "rag/chat.html")
+
+    chat_uuid = str(uuid.uuid4())
+    return render(request, "rag/chat.html", {"uuid": chat_uuid})
 
 
 @csrf_exempt
