@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block title %}Chat avec IA{% endblock %}
 
 {% block styles %}
@@ -125,6 +127,8 @@
     <div id="file-upload-status" class="response" style="display: none;"></div>
 </div>
 
+<script src="{% static 'django_eventstream/eventsource.min.js' %}"></script>
+<script src="{% static 'django_eventstream/reconnecting-eventsource.js' %}"></script>
 <script>
     let uuid = localStorage.getItem('chat_uuid');
     if (!uuid) {
@@ -136,18 +140,19 @@
         localStorage.setItem('chat_uuid', uuid);
     }
 
-    const eventSource = new EventSource(`/api/event?channels=chat_${uuid}`);
+    const eventSource = new ReconnectingEventSource(`/api/event?channels=chat_${uuid}`);
     const chatSources = document.getElementById('chat-sources');
 
-    eventSource.onmessage = function(e) {
+    eventSource.addEventListener('message', function(e) {
         const data = JSON.parse(e.data);
         const chatResponse = document.getElementById('chat-response');
         chatResponse.textContent += data.text;
-    };
+    }, false);
 
-    eventSource.onerror = function(e) {
+    eventSource.addEventListener('error', function(e) {
         console.error('Erreur lors de la connexion SSE :', e);
-    };
+        chatResponse.innerHTML = 'Une erreur est survenue. \n' + e;
+    }, false);
 
     document.getElementById('chat-form').addEventListener('submit', function(event) {
         event.preventDefault();
