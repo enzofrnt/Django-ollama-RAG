@@ -8,10 +8,10 @@ from hybridrouter import HybridRouter
 from . import views, viewsets
 
 router = HybridRouter()
-router.register(r"documents", viewsets.DocumentViewSet)
-router.register(r"chunks", viewsets.ChunkViewSet)
+router.register(r"document", viewsets.DocumentViewSet)
+router.register(r"chunk", viewsets.ChunkViewSet)
 router.register(
-    "events",
+    "event",
     EventsViewSet,
     basename="events1",
 )

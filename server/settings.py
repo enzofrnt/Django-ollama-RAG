@@ -26,7 +26,9 @@ SECRET_KEY = "django-insecure-zb!il4js#4dbs%vlfa3m-g6-ketss=4!es!p!y+1n0740x4s4f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # Application definition
@@ -44,21 +46,17 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "wait_for_db",
+    "corsheaders",
     "rag",
 ]
 
 
 REST_FRAMEWORK = {
-    "DEFAULT_RENDERER_CLASSES": [
-        "rest_framework.renderers.JSONRenderer",
-        "rest_framework.renderers.BrowsableAPIRenderer",
-        "django_eventstream.renderers.SSEEventRenderer",
-        "django_eventstream.renderers.BrowsableAPIEventStreamRenderer",
-    ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

@@ -132,7 +132,7 @@
         localStorage.setItem('chat_uuid', uuid);
     }
 
-    const eventSource = new EventSource(`/api/events/?channels=chat_${uuid}`);
+    const eventSource = new EventSource(`/api/event?channels=chat_${uuid}`);
     const chatSources = document.getElementById('chat-sources');
 
     eventSource.onmessage = function(e) {
