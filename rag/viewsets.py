@@ -1,6 +1,7 @@
 import logging
 import mimetypes
 
+from django_filters.rest_framework import DjangoFilterBackend
 from langchain_community.document_loaders import (
     PyPDFLoader,
     TextLoader,
@@ -108,3 +109,5 @@ class DocumentViewSet(
 class ChunkViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Chunk.objects.all()
     serializer_class = ChunkSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["document"]
