@@ -13,8 +13,8 @@ def split_documents(documents: list[Document]):
     :return: Liste de morceaux de texte segmentés.
     """
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,  # Taille maximale d'un morceau (en caractères).
-        chunk_overlap=80,  # Chevauchement entre les morceaux pour la continuité.
+        chunk_size=1000,  # Taille maximale d'un morceau (en caractères).
+        chunk_overlap=200,  # Chevauchement entre les morceaux pour la continuité.
         length_function=len,  # Fonction pour mesurer la longueur des morceaux.
         is_separator_regex=False,  # Indique que le séparateur n'est pas une expression régulière.
     )

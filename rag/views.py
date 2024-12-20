@@ -211,18 +211,22 @@ class ChatAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         query_text = request.data.get("query")
+        uuid = request.data.get("uuid")
         if not query_text:
             return Response({"error": "Le paramètre 'query' est requis."}, status=400)
+        if not uuid:
+            return Response({"error": "Le paramètre 'uuid' est requis."}, status=400)
 
         # Interroge le modèle RAG
         response_generator, sources = query_rag(query_text)
         formatted_sources_text = clean_ids(sources)
-        channel_name = "chat"
+        channel_name = uuid
 
         try:
             # Envoi des chunks via SSE (cette logique dépend de votre implémentation)
             for chunk in response_generator:
                 send_event(channel_name, "message", {"text": chunk})
+            send_event(channel_name, "message", {"text": "END OF RESPONS"})
         except ConnectError:
             send_event(
                 channel_name,
